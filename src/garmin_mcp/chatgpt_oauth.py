@@ -341,7 +341,7 @@ class ChatGPTOAuth:
         # ChatGPT's callback can redirect through platform.openai.com, so
         # restricting form-action to self blocks successful authorization.
         # Keep scripts disabled and reject framing; redirect_uri is already
-        # validated against ChatGPT's signed client metadata.
+        # validated against ChatGPT's trusted HTTPS client metadata.
         return HTMLResponse(
             page,
             headers={
