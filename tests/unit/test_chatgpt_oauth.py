@@ -129,6 +129,12 @@ def test_authorization_code_exchange_and_refresh(oauth, oauth_app):
     with TestClient(oauth_app) as client:
         consent = client.get("/oauth/authorize", params=_authorization_params())
         assert consent.status_code == 200
+        # A browser follows the consent form's POST -> 303 to ChatGPT, which
+        # may redirect through platform.openai.com. form-action would block it.
+        csp = consent.headers["content-security-policy"]
+        assert "form-action" not in csp
+        assert "default-src 'none'" in csp
+        assert "frame-ancestors 'none'" in csp
         import re
         token = re.search(r'name="request_token" value="([^"]+)"', consent.text).group(1)
         denied = client.post(
