@@ -337,12 +337,17 @@ class ChatGPTOAuth:
             + '<input type="password" id="password" name="password" required autocomplete="off">'
             + '<button type="submit">Authorize ChatGPT</button></form></body></html>'
         )
+        # Chrome applies form-action to the entire POST -> 303 redirect chain.
+        # ChatGPT's callback can redirect through platform.openai.com, so
+        # restricting form-action to self blocks successful authorization.
+        # Keep scripts disabled and reject framing; redirect_uri is already
+        # validated against ChatGPT's signed client metadata.
         return HTMLResponse(
             page,
             headers={
                 "Cache-Control": "no-store",
                 "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; "
-                "form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
+                "frame-ancestors 'none'; base-uri 'none'",
                 "X-Frame-Options": "DENY",
                 "Referrer-Policy": "no-referrer",
             },
